@@ -21,12 +21,12 @@ namespace CountDownTimerDemo {
 
 		protected override void OnCreate(Bundle bundle) {
 			base.OnCreate(bundle);
-			//timer vars
+			//set timer vars
 			duration = 15000;
 			interval = 500;
 
 			//get a new timer object
-			countDownTimer = NewTimer(duration, interval);
+			countDownTimer = new CTimer(duration, interval, OnTick, OnFinish);
 
 			// Set our view from the "main" layout resource
 			SetContentView(Resource.Layout.Main);
@@ -45,22 +45,7 @@ namespace CountDownTimerDemo {
 			};
 		}
 
-
-
-		#region CountDownTimer wrapper
-
-		//helper function to assign appropriate methods to timer event handlers
-		private CountDownTimer NewTimer(int duration, int interval) {
-			CTimer cTimer = new CTimer(duration, interval);
-			cTimer.Tick += OnTick;
-			cTimer.Finish += OnFinish;
-
-			return cTimer;
-		}
-
-		//delegates to communicate with UI from timer code
-		public delegate void TickEvent(long millisUntilFinished);
-		public delegate void FinishEvent();
+		#region CountDownTimer delegate functions
 
 		//(delegated) event methods for timer
 		public void OnTick(long millisUntilFinished) {
@@ -69,29 +54,9 @@ namespace CountDownTimerDemo {
 				textView.SetText(outputTime.ToString(), TextView.BufferType.Normal);
 			}
 		}
-
 		public void OnFinish() {
 			textView.SetText("Finished", TextView.BufferType.Normal);
 			isTimerRunning = false;
-		}
-
-		//wrapper class to be able to instantiate CountDownTimer
-		class CTimer : CountDownTimer {
-			public event TickEvent Tick;
-			public event FinishEvent Finish;
-
-			public CTimer(int duration, int interval) : base(duration, interval) { }
-
-			public override void OnTick(long millisUntilFinished) {
-				if (Tick != null) {
-					Tick(millisUntilFinished);
-				}
-			}
-
-			public override void OnFinish() {
-				Finish();
-			}
-
 		}
 
 		#endregion
